@@ -1,73 +1,93 @@
 const { readArticlesSync, writeArticles } = require('../dev-data/utils');
 
-// Use readArticlesSync function to get articles
-// Copy it to the functions below where articles are needed and remove from here
-const articles = readArticlesSync();
+exports.checkId = (req, res, next, commentId) => {
+  const articles = readArticlesSync();
+  const articleIndex = res.locals.articleIndex;
+  const articleCommnets = articles[articleIndex].comments
+  const commentIndex = articleCommnets.findIndex(comment => comment.id === +commentId);
 
-exports.checkId = () => {
-  // this middleware should check if comment with specified commentId exists
-  // if it does - the next middleware should be called
-  // if it does not - response status should be set to 404
-  // and result should be json:
-  // {
-  //   status: 'fail'
-  //   message: 'Invalid comment id',
-  // }
+  if(commentIndex === -1){
+    res.status(404).json({ status: 'fail', message: 'Invalid comment id' });
+    return;
+  }else{
+    res.locals.commentIndex = commentIndex;
+    next()
+  }
 };
 
-exports.checkArticleComment = () => {
-  // this middleware should check if comment in request body is correct
-  // if it is - the next middleware should be called
-  // if it is not - response status should be set to 400
-  // and result should be json:
-  // {
-  //   status: 'fail'
-  //   message: 'Content is required',
-  // }
+exports.checkArticleComment = (req, res, next) => {
+  if(!req.body.content){
+    res.status(400).json({status: 'fail', message: 'Content is required'});
+    return;
+  }
+
+  next();
 };
 
-exports.getAllArticleComments = () => {
-  // response status should be 200
-  // all comments of article with specified id should be provided
-  // result should be json
-  // {
-  //   status: 'success',
-  //   data: {
-  //     count: comments count,
-  //     comments: comments,
-  //   },
-  // }
+exports.getAllArticleComments = (req, res) => {
+  const articles = readArticlesSync();
+  const articleIndex = res.locals.articleIndex;
+
+  res.status(200).json({ 
+    status: 'success', 
+    data: { 
+      count: articles[articleIndex].comments.length,
+      comments: articles[articleIndex].comments
+    }
+  });
 };
 
-exports.getArticleComment = () => {
-  // response status should be 200
-  // comment of article should be provided
-  // result should be json
-  // {
-  //   status: 'success',
-  //   data: {
-  //     comment: requested comment,
-  //   },
-  // }
+exports.getArticleComment = (req, res) => {
+  const articles = readArticlesSync();
+  const commentFound = articles[res.locals.articleIndex].comments[res.locals.commentIndex];
+  res.status(200).json({ 
+    status: 'success', 
+    data: { 
+      comment: commentFound
+    }
+  });
 };
 
-exports.postArticleComment = () => {
-  // new comment should be added to the article
-  // id should be evaluated as id of last comment of this article + 1
-  // response status should be 201
-  // result should be json
-  // {
-  //   status: 'success',
-  //   data: { comment: newComment }
-  // }
+exports.postArticleComment = (req, res) => {
+  const articles = readArticlesSync();
+  const articleComments = articles[res.locals.articleIndex].comments
+  let id;
+
+  articleComments.length === 0 ?
+  id = 0 :
+  id = articleComments[articleComments.length - 1].id + 1
+
+  const newComment = {
+    id: id,
+    ...req.body
+  }
+
+  articleComments.push(newComment);
+
+  writeArticles(articles, (err) => {
+    if(err){
+      throw err
+    }
+    res.status(201).json({ 
+      status: 'success', 
+      data: { 
+        comment: newComment
+      }
+    });
+  });
 };
 
-exports.deleteArticleComment = () => {
-  // comment with specified commentId should be deleted from the article comments
-  // response status should be 204
-  // result should be json
-  // {
-  //   status: 'success',
-  //   data: { comment: null }
-  // }
+exports.deleteArticleComment = (req, res) => {
+  const articles = readArticlesSync();
+  articles[res.locals.articleIndex].comments.splice(res.locals.commentIndex, 1);
+
+  writeArticles(articles, (err) => {
+    if(err){
+      throw err
+    }
+    res.status(204).json({ 
+      status: 'success', 
+      data: { comment: null } 
+    });
+  });
 };

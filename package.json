@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "jest",
+    "test": "node_modules/.bin/jest",
     "serve": "nodemon server.js"
   },
   "author": "nrevutska",
