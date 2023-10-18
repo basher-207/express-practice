@@ -95,7 +95,7 @@ exports.patchArticle = (req, res) => {
 };
 
 exports.deleteArticle = (req, res) => {
-  const articles = readArticlesSync();
+  const articles = [...readArticlesSync()];
 
   articles.splice(res.locals.articleIndex, 1);
 

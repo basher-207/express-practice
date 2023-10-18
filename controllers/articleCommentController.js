@@ -76,7 +76,7 @@ exports.postArticleComment = (req, res) => {
 };
 
 exports.deleteArticleComment = (req, res) => {
-  const articles = readArticlesSync();
+  const articles = [...readArticlesSync()];
   articles[res.locals.articleIndex].comments.splice(res.locals.commentIndex, 1);
 
   writeArticles(articles, (err) => {
