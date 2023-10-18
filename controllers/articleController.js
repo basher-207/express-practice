@@ -9,8 +9,8 @@ exports.checkId = (req, res, next) => {
     res.status(404).json({ status: 'fail', message: 'Invalid article id' });
     return;
   }
-  res.locals.articleIndex = articleIndex;
-  next();
+    res.locals.articleIndex = articleIndex;
+    next();
 };
 
 exports.checkArticle = (req, res, next) => {
@@ -18,29 +18,29 @@ exports.checkArticle = (req, res, next) => {
     res.status(400).json({ status: 'fail', message: 'Title is required' });
     return;
   }
-
   next();
 };
 
 exports.getAllArticles = (req, res) => {
   const articles = readArticlesSync();
-  const requestedTitle = String(req.query.title);
 
   if(req.query.title){
     const articlesWithTitle = articles.reduce((acc, article) => {
-      if(article.title.toLowerCase() == requestedTitle.toLowerCase()){
+      const articleTitle = article.title.toLowerCase();
+      const requestedTitle = String(req.query.title).toLowerCase();
+      if(articleTitle.includes(requestedTitle)){
         return [...acc, article];
       }
       return [...acc];
     }, []);
 
-    let response;
-
-    // articlesWithTitle.length === 0 ? 
-    // response = { statusCode: 404, data: { status: 'fail', message: "Invalid article title" }} :
-    response = { statusCode: 200, data: { status: 'success', data: { count: articlesWithTitle.length, articles: articlesWithTitle }}}
-
-    res.status(response.statusCode).json(response.data);
+    res.status(200).json({
+      status: 'success',
+      data: { 
+        count: articlesWithTitle.length, 
+        articles: articlesWithTitle 
+      }
+    });
     return;
   }
 
@@ -61,9 +61,8 @@ exports.getArticle = (req, res) => {
 exports.postArticle = (req, res) => {
   const articles = readArticlesSync();
 
-  let id;
-  articles.length === 0 ? id = 0 : id = articles[articles.length - 1].id + 1
-  const newArticle = { id: id, ...req.body };
+  let id = articles[articles.length - 1].id + 1
+  const newArticle = { ...req.body, id: id};
 
   articles.push(newArticle);
 
@@ -81,7 +80,8 @@ exports.patchArticle = (req, res) => {
 
   const UpdatedArticleData = {
     ...articles[res.locals.articleIndex],
-    ...articleDataToUpdate
+    ...articleDataToUpdate,
+    id: articles[res.locals.articleIndex].id
   }
 
   articles.splice(res.locals.articleIndex, 1, UpdatedArticleData);

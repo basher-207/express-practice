@@ -1,10 +1,9 @@
 const { readArticlesSync, writeArticles } = require('../dev-data/utils');
 
-exports.checkId = (req, res, next, commentId) => {
+exports.checkId = (req, res, next) => {
   const articles = readArticlesSync();
-  const articleIndex = res.locals.articleIndex;
-  const articleCommnets = articles[articleIndex].comments
-  const commentIndex = articleCommnets.findIndex(comment => comment.id === +commentId);
+  const articleCommnets = articles[res.locals.articleIndex].comments;
+  const commentIndex = articleCommnets.findIndex(comment => comment.id === +req.params.commentId);
 
   if(commentIndex === -1){
     res.status(404).json({ status: 'fail', message: 'Invalid comment id' });
@@ -20,7 +19,6 @@ exports.checkArticleComment = (req, res, next) => {
     res.status(400).json({status: 'fail', message: 'Content is required'});
     return;
   }
-
   next();
 };
 

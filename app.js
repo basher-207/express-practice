@@ -9,6 +9,4 @@ app.use(express.json());
 app.use("/api/v1/articles", articleRouter);
 app.use("/api/v1/articles/:id/comments", articleCommentRouter);
 
-// app should use articleCommentRouter and articleRouter routers
-
 module.exports = app;

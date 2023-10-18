@@ -44,3 +44,21 @@
     ]
   }
 ]
+
+
+
+
+///test 
+[
+  {
+  "id": 0,
+  "title": "The Coastal Explorer",
+  "description": "Discover stunning coastal landscapes on a hiking adventure"
+},
+{
+  "id": 1,
+  "title": "The Mountain Trekker",
+  "description":
+    "Experience the rugged beauty of the Rocky Mountains on an unforgettable hike"
+}
+]
